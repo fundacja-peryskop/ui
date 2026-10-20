@@ -117,18 +117,25 @@ export const SelectContentFrame = styled(TSelect.Content, {
 export const SelectViewportFrame = styled(TSelect.Viewport, {
   name: 'SelectViewport',
   padding: 4,
-  borderRadius: '$sm',
-  borderWidth: 1,
-  borderStyle: 'solid',
-  borderColor: '$borderColor',
   backgroundColor: '$background',
-  shadowColor: '$shadowColor',
-  shadowOffset: { width: 0, height: 8 },
-  shadowOpacity: 1,
-  shadowRadius: 24,
   minWidth: 160,
   maxHeight: 320,
   overflow: 'hidden',
+
+  // Popover chrome (rounded border + elevation) applies only at desktop widths
+  // (>=768px), where the Select renders as a floating popover. In the mobile
+  // bottom sheet the options sit directly on the sheet surface, so this inner
+  // box is dropped to avoid a card-inside-a-card look.
+  $md: {
+    borderRadius: '$sm',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: '$borderColor',
+    shadowColor: '$shadowColor',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 24,
+  },
 })
 
 // ---------------------------------------------------------------------------
@@ -146,7 +153,9 @@ export const SelectItemFrame = styled(TSelect.Item, {
   alignItems: 'center',
   flexDirection: 'row',
   gap: 8,
-  minHeight: 36,
+  // 44px keeps rows comfortable as touch targets in the mobile sheet while
+  // still reading well as a desktop popover row.
+  minHeight: 44,
 
   hoverStyle: {
     backgroundColor: '$backgroundHover',
@@ -154,6 +163,9 @@ export const SelectItemFrame = styled(TSelect.Item, {
   focusStyle: {
     backgroundColor: '$backgroundFocus',
     outlineWidth: 0,
+  },
+  pressStyle: {
+    backgroundColor: '$backgroundPress',
   },
 })
 

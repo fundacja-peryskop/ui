@@ -1,5 +1,5 @@
 import { Fragment, useId, useMemo, useState, type ReactNode } from 'react'
-import { Adapt, Sheet, Select as TSelect, YStack } from 'tamagui'
+import { Adapt, Sheet, Select as TSelect, Text, YStack } from 'tamagui'
 import {
   SelectChevron,
   SelectContentFrame,
@@ -184,12 +184,40 @@ export function Select({
         {native ? (
           <Adapt when="maxMd" platform="touch">
             <Sheet native modal dismissOnSnapToBottom snapPoints={[60]} animation="quick">
-              <Sheet.Frame padding={0}>
-                <Sheet.ScrollView>
-                  <Adapt.Contents />
+              <Sheet.Overlay
+                backgroundColor="$overlay"
+                animation="quick"
+                enterStyle={{ opacity: 0 }}
+                exitStyle={{ opacity: 0 }}
+              />
+              {/* Grab bar — the standard mobile affordance for drag-to-dismiss. */}
+              <Sheet.Handle backgroundColor="$inkLight" opacity={0.25} height={5} width={40} />
+              <Sheet.Frame
+                backgroundColor="$background"
+                borderTopLeftRadius={20}
+                borderTopRightRadius={20}
+                paddingTop="$md"
+                paddingBottom="$xl"
+              >
+                {/* Title header gives the picker context (mirrors the trigger label). */}
+                {label ? (
+                  <Text
+                    fontFamily="$body"
+                    fontSize={18}
+                    fontWeight="600"
+                    color="$color"
+                    paddingHorizontal="$lg"
+                    paddingBottom="$sm"
+                  >
+                    {label}
+                  </Text>
+                ) : null}
+                <Sheet.ScrollView showsVerticalScrollIndicator={false}>
+                  <YStack paddingHorizontal="$sm" paddingBottom="$sm">
+                    <Adapt.Contents />
+                  </YStack>
                 </Sheet.ScrollView>
               </Sheet.Frame>
-              <Sheet.Overlay backgroundColor="$overlay" />
             </Sheet>
           </Adapt>
         ) : null}
