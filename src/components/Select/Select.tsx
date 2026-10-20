@@ -143,6 +143,16 @@ export function Select({
     return flatOptions.find((o) => o.value === value)?.label
   }, [flatOptions, value])
 
+  // Size the mobile sheet to roughly fit its options so short lists don't leave
+  // a big empty gap. A percentage snap point keeps positioning independent of
+  // layout measurement (see the Adapt note below); long lists hit the cap and
+  // scroll inside the sheet.
+  const sheetSnapPoint = useMemo(() => {
+    const groupHeaders = isGrouped(options) ? options.length : 0
+    const estimatedPx = 72 + (flatOptions.length + groupHeaders) * 46 + 16
+    return Math.min(90, Math.max(38, Math.round((estimatedPx / 780) * 100)))
+  }, [flatOptions.length, options])
+
   return (
     <YStack>
       {label ? (
@@ -183,7 +193,13 @@ export function Select({
             option lists scroll. */}
         {native ? (
           <Adapt when="maxMd" platform="touch">
-            <Sheet native modal dismissOnSnapToBottom snapPoints={[60]} animation="quick">
+            <Sheet
+              native
+              modal
+              dismissOnSnapToBottom
+              snapPoints={[sheetSnapPoint]}
+              animation="quick"
+            >
               <Sheet.Overlay
                 backgroundColor="$overlay"
                 animation="quick"
@@ -191,15 +207,16 @@ export function Select({
                 exitStyle={{ opacity: 0 }}
               />
               {/* Grab bar — the standard mobile affordance for drag-to-dismiss. */}
-              <Sheet.Handle backgroundColor="$inkLight" opacity={0.25} height={5} width={40} />
+              <Sheet.Handle backgroundColor="$inkLight" opacity={0.35} height={5} width={44} />
               <Sheet.Frame
                 backgroundColor="$background"
-                borderTopLeftRadius={20}
-                borderTopRightRadius={20}
-                paddingTop="$md"
-                paddingBottom="$xl"
+                borderTopLeftRadius={22}
+                borderTopRightRadius={22}
+                paddingTop="$sm"
+                paddingBottom="$lg"
               >
-                {/* Title header gives the picker context (mirrors the trigger label). */}
+                {/* Title header gives the picker context (mirrors the trigger
+                    label) and a hairline divider separates it from the list. */}
                 {label ? (
                   <Text
                     fontFamily="$body"
@@ -207,13 +224,17 @@ export function Select({
                     fontWeight="600"
                     color="$color"
                     paddingHorizontal="$lg"
-                    paddingBottom="$sm"
+                    paddingTop="$xs"
+                    paddingBottom="$md"
+                    marginBottom="$xs"
+                    borderBottomWidth={1}
+                    borderBottomColor="$borderColor"
                   >
                     {label}
                   </Text>
                 ) : null}
                 <Sheet.ScrollView showsVerticalScrollIndicator={false}>
-                  <YStack paddingHorizontal="$sm" paddingBottom="$sm">
+                  <YStack paddingHorizontal="$sm" paddingTop="$xs" paddingBottom="$sm">
                     <Adapt.Contents />
                   </YStack>
                 </Sheet.ScrollView>
@@ -225,8 +246,8 @@ export function Select({
         <SelectContentFrame>
           <SelectViewportFrame>
             {isGrouped(options)
-              ? renderGroupedItems(options, renderItem)
-              : renderFlatItems(options, renderItem)}
+              ? renderGroupedItems(options, renderItem, value)
+              : renderFlatItems(options, renderItem, 0, value)}
           </SelectViewportFrame>
         </SelectContentFrame>
       </TSelect>
@@ -248,32 +269,46 @@ function renderFlatItems(
   options: SelectOption[],
   renderItem?: SelectProps['renderItem'],
   indexOffset = 0,
+  selectedValue?: string,
 ) {
-  return options.map((option, i) => (
-    <SelectItemFrame
-      key={option.value}
-      index={indexOffset + i}
-      value={option.value}
-      disabled={option.disabled}
-    >
-      {renderItem ? (
-        renderItem(option, indexOffset + i)
-      ) : (
-        <>
-          <SelectItemTextValue>{option.label}</SelectItemTextValue>
-          <TSelect.ItemIndicator>
-            <SelectItemIndicator>✓</SelectItemIndicator>
-          </TSelect.ItemIndicator>
-        </>
-      )}
-    </SelectItemFrame>
-  ))
+  return options.map((option, i) => {
+    const isSelected = option.value === selectedValue
+    return (
+      <SelectItemFrame
+        key={option.value}
+        index={indexOffset + i}
+        value={option.value}
+        disabled={option.disabled}
+        backgroundColor={isSelected ? '$backgroundStrong' : undefined}
+      >
+        {renderItem ? (
+          renderItem(option, indexOffset + i)
+        ) : (
+          <>
+            <SelectItemTextValue
+              color={isSelected ? '$primary' : undefined}
+              fontWeight={isSelected ? '600' : '400'}
+            >
+              {option.label}
+            </SelectItemTextValue>
+            <TSelect.ItemIndicator>
+              <SelectItemIndicator>✓</SelectItemIndicator>
+            </TSelect.ItemIndicator>
+          </>
+        )}
+      </SelectItemFrame>
+    )
+  })
 }
 
-function renderGroupedItems(groups: SelectOptionGroup[], renderItem?: SelectProps['renderItem']) {
+function renderGroupedItems(
+  groups: SelectOptionGroup[],
+  renderItem?: SelectProps['renderItem'],
+  selectedValue?: string,
+) {
   let running = 0
   return groups.map((group, gi) => {
-    const items = renderFlatItems(group.options, renderItem, running)
+    const items = renderFlatItems(group.options, renderItem, running, selectedValue)
     running += group.options.length
     return (
       <Fragment key={`${group.label}-${gi}`}>
