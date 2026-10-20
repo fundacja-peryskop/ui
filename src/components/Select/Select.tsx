@@ -169,13 +169,25 @@ export function Select({
           <SelectChevron>▾</SelectChevron>
         </SelectTriggerFrame>
 
-        {/* Adapt swaps the popover for a bottom Sheet at the `sm` breakpoint
-            (or smaller) so touch users get a familiar mobile picker. */}
+        {/* Adapt swaps the popover for a bottom Sheet at `md` and below on touch
+            devices so users get a familiar mobile picker.
+
+            IMPORTANT: this uses a percent snap point + `Sheet.ScrollView`, NOT
+            `snapPointsMode="fit"`. With `fit`, the Sheet derives its open
+            position from `onLayout` measurements of the frame/content; in this
+            app those measurements resolve to 0, so the Sheet stays parked off
+            screen (`translateY: 10000`) — the overlay dims but the menu never
+            appears and the form can't be completed on mobile. A percent snap
+            point gives the frame an explicit height, so positioning no longer
+            depends on layout measurement, and `Sheet.ScrollView` lets long
+            option lists scroll. */}
         {native ? (
           <Adapt when="maxMd" platform="touch">
-            <Sheet native modal dismissOnSnapToBottom snapPointsMode="fit">
+            <Sheet native modal dismissOnSnapToBottom snapPoints={[60]} animation="quick">
               <Sheet.Frame padding={0}>
-                <Adapt.Contents />
+                <Sheet.ScrollView>
+                  <Adapt.Contents />
+                </Sheet.ScrollView>
               </Sheet.Frame>
               <Sheet.Overlay backgroundColor="$overlay" />
             </Sheet>
