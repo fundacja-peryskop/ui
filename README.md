@@ -182,6 +182,14 @@ import { Button, Input, Checkbox, Card /* … */ } from '@fundacja-peryskop/ui'
 | `Avatar`  | Circular user image with fallback initials. `Avatar.Group` for stacked avatars.        |
 | `Person`  | Composite of Avatar + name + role. Common list-row identity primitive.                 |
 
+### Overlays
+
+| Component       | Purpose                                                                                    |
+| --------------- | ------------------------------------------------------------------------------------------ |
+| `Popover`       | Floating card anchored to a trigger. Flips / shifts to stay on screen, closes on outside.  |
+| `Dialog`        | Modal with title, description, body and footer slots. Focus trap, scroll lock, `Escape`.   |
+| `ConfirmDialog` | `Dialog` preset for "are you sure?" decisions - cancel + confirm in a primary/danger tone. |
+
 ### Content
 
 | Component    | Purpose                                                                                                                                           |
